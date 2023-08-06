@@ -3,6 +3,7 @@ import firebase_admin
 from firebase_admin import credentials
 
 #part 2
+import gdown
 import requests
 import base64
 import os
@@ -19,6 +20,19 @@ firebase_admin.initialize_app(cred)
 
 
 #part 2
+
+def download_file_from_google_drive(file_id, destination):
+    url = f"https://drive.google.com/uc?id={file_id}"
+    gdown.download(url, destination, quiet=False)
+
+# Define your file ID and destination path
+file_id = '1lZB6gg18DayNB63zJd4YcLE4UKtznyL6'
+destination_path = '123.pdf'
+
+# Download the file
+download_file_from_google_drive(file_id, destination_path)
+
+
 def ocr_space_file(filename, language, overlay, ocr_engine):
     payload = {
         'apikey': 'K89929856188957',
