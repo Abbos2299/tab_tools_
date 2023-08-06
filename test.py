@@ -10,6 +10,7 @@ import os
 import sys
 
 
+
 #part 1
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
@@ -19,7 +20,23 @@ firebase_admin.initialize_app(cred)
 
 
 
+
 #part 2
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/process', methods=['GET'])
+def handle_request():
+    # Execute your desired functionality here
+    # For example, you can process data, retrieve information from a database, or perform any other task
+    return 'Success'
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8501)
+
+
+
 
 def download_file_from_google_drive(file_id, destination):
     url = f"https://drive.google.com/uc?id={file_id}"
