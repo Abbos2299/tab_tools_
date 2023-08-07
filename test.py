@@ -12,6 +12,29 @@ app = Flask(__name__)
 cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
 firebase_admin.initialize_app(cred)
 
+def ocr_space_file(file_path, language, detect_orientation, is_create_searchable_pdf, scale, is_table, ocr_engine):
+    payload = {
+        'apikey': 'K89929856188957',
+        'language': language,
+        'detectOrientation': detect_orientation,
+        'isCreateSearchablePdf': is_create_searchable_pdf,
+        'scale': scale,
+        'isTable': is_table,
+        'OCREngine': ocr_engine,
+    }
+
+    with open(file_path, 'rb') as f:
+        result = requests.post('https://api.ocr.space/parse/image', 
+                               files={'filename': f},
+                               data=payload).json()
+
+    if 'ParsedResults' in result:
+        for parsed_result in result['ParsedResults']:
+            print(parsed_result['ParsedText'])
+    else:
+        print("Error occurred: ", result['ErrorMessage'])
+
+
 @app.route('/launch', methods=['GET'])
 def launch_python_file():
     user_uid = request.args.get('uid')
@@ -41,6 +64,9 @@ def launch_python_file():
             f.write(response.content)
 
         print(f'File "{file_name}" downloaded successfully')
+        
+        # Perform OCR on the downloaded file
+        ocr_space_file(file_name, 'eng', True, False, False, False, '2')
 
      # Wait for 20 seconds
         time.sleep(20)
