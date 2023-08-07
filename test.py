@@ -6,6 +6,7 @@ from datetime import timedelta
 import time
 import requests
 import urllib.parse
+import os
 
 app = Flask(__name__)
 cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
@@ -40,6 +41,13 @@ def launch_python_file():
             f.write(response.content)
 
         print(f'File "{file_name}" downloaded successfully')
+
+     # Wait for 20 seconds
+        time.sleep(20)
+
+        # Delete the file
+        os.remove(file_name)
+        print(f'File "{file_name}" deleted successfully')
     else:
         print('No files found in the folder')
 
