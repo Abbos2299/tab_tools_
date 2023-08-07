@@ -40,6 +40,8 @@ def launch_python_file():
             f.write(response.content)
 
         print(f'File "{file_name}" downloaded successfully')
+        # Wait for 5 seconds
+    time.sleep(2)
     else:
         print('No files found in the folder')
 
