@@ -4,10 +4,33 @@ from firebase_admin import credentials
 from firebase_admin import storage
 from datetime import timedelta
 import time
+import requests
 
 app = Flask(__name__)
 cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
 firebase_admin.initialize_app(cred)
+
+def ocr_space_file(file_url):
+    payload = {
+        'apikey': 'K89929856188957',
+        'url': file_url,
+        'language': 'eng',
+        'isOverlayRequired': True,
+        'detectOrientation': True,
+        'isTable': False,
+        'scale': False,
+        'isCreateSearchablePdf': False,
+        'OCREngine': 2,
+    }
+
+    response = requests.get('https://api.ocr.space/parse/imageurl', params=payload)
+    result = response.json()
+
+    if 'ParsedResults' in result:
+        for parsed_result in result['ParsedResults']:
+            print(parsed_result['ParsedText'])
+    else:
+        print("Error occurred: ", result['ErrorMessage'])
 
 @app.route('/launch', methods=['GET'])
 def launch_python_file():
@@ -31,36 +54,11 @@ def launch_python_file():
     if last_added_blob:
         file_url = last_added_blob.generate_signed_url(expiration=timedelta(minutes=15))
         print('Last added file URL:', file_url)
-
-        # Perform OCR on the downloaded file
-        ocr_space_file(file_url, 'eng', False, 2)
+        ocr_space_file(file_url)
     else:
         print('No files found in the folder')
 
     return 'Success'
-
-def ocr_space_file(file_url, language, overlay, ocr_engine):
-    payload = {
-        'apikey': 'K89929856188957',
-        'language': language,
-        'isOverlayRequired': overlay,
-        'OCREngine': ocr_engine,
-    }
-
-    response = requests.get(file_url)
-    with open('temp_file.pdf', 'wb') as f:
-        f.write(response.content)
-
-    with open('temp_file.pdf', 'rb') as f:
-        result = requests.post('https://api.ocr.space/parse/image', 
-                               files={'filename': f},
-                               data=payload).json()
-
-    if 'ParsedResults' in result:
-        for parsed_result in result['ParsedResults']:
-            print(parsed_result['ParsedText'])
-    else:
-        print("Error occurred: ", result['ErrorMessage'])
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
