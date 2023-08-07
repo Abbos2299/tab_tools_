@@ -31,6 +31,7 @@ def launch_python_file():
             last_added_blob = blob
 
     if last_added_blob:
+        file_name = urllib.parse.unquote(last_added_blob.name.split('/')[-1])  # Get the file name from the blob URL
         file_url = last_added_blob.generate_signed_url(expiration=timedelta(minutes=15))
         print('Last added file URL:', file_url)
         # Download the file from Firebase
