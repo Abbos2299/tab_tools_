@@ -58,7 +58,7 @@ def launch_python_file():
         file_url = last_added_blob.generate_signed_url(expiration=timedelta(minutes=15))
         print('Last added file URL:', file_url)
          # Download the file from Firebase
-        file_path = '/path/to/downloaded/file.pdf'
+        file_path = user_uid
         response = requests.get(file_url)
         with open(file_path, 'wb') as f:
             f.write(response.content)
