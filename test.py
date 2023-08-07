@@ -5,8 +5,7 @@ from firebase_admin import storage
 from datetime import timedelta
 import time
 import requests
-
-
+import urllib.parse
 
 app = Flask(__name__)
 cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
@@ -34,14 +33,12 @@ def launch_python_file():
     if last_added_blob:
         file_url = last_added_blob.generate_signed_url(expiration=timedelta(minutes=15))
         print('Last added file URL:', file_url)
-         # Download the file from Firebase
+        # Download the file from Firebase
         response = requests.get(file_url)
         with open(file_name, 'wb') as f:
             f.write(response.content)
 
         print(f'File "{file_name}" downloaded successfully')
-        # Wait for 5 seconds
-    time.sleep(2)
     else:
         print('No files found in the folder')
 
