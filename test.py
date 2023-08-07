@@ -34,12 +34,12 @@ def launch_python_file():
     if last_added_blob:
         file_url = last_added_blob.generate_signed_url(expiration=timedelta(minutes=15))
         print('Last added file URL:', file_url)
-        # Download the file from Firebase
+         # Download the file from Firebase
         response = requests.get(file_url)
-        with open('downloaded_file.pdf', 'wb') as f:
+        with open(file_name, 'wb') as f:
             f.write(response.content)
 
-        print('File downloaded successfully')
+        print(f'File "{file_name}" downloaded successfully')
     else:
         print('No files found in the folder')
 
