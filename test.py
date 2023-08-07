@@ -3,8 +3,6 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
 from datetime import timedelta
-import time
-
 
 app = Flask(__name__)
 cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
@@ -17,11 +15,8 @@ def launch_python_file():
 
     bucket_name = 'tab-tools.appspot.com'
     bucket = storage.bucket(bucket_name)
-    folder_name = 'user_uid'  # Replace with the appropriate user UID
+    folder_name = 'ZFjks5nrhOXbTsT4qhg1gtREPOw1'  # Replace with the appropriate user UID
     blobs = bucket.list_blobs(prefix=folder_name)
-
-    # Wait for 5 seconds
-    time.sleep(5)
 
     # Iterate over the blobs and get the last added file
     last_added_blob = None
@@ -38,4 +33,4 @@ def launch_python_file():
     return 'Success'
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=8000)
