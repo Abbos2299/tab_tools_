@@ -5,26 +5,29 @@ from firebase_admin import storage
 from datetime import timedelta
 import time
 import requests
+import os
+
 
 app = Flask(__name__)
 cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
 firebase_admin.initialize_app(cred)
 
-def ocr_space_file(file_url):
+def ocr_space_file(file_path, language, overlay, ocr_engine):
     payload = {
         'apikey': 'K89929856188957',
-        'url': file_url,
-        'language': 'eng',
-        'isOverlayRequired': True,
+        'language': language,
+        'isOverlayRequired': overlay,
         'detectOrientation': True,
         'isTable': False,
         'scale': False,
         'isCreateSearchablePdf': False,
-        'OCREngine': 2,
+        'OCREngine': ocr_engine,
     }
 
-    response = requests.get('https://api.ocr.space/parse/imageurl', params=payload)
-    result = response.json()
+    with open(file_path, 'rb') as f:
+        result = requests.post('https://api.ocr.space/parse/image', 
+                               files={'filename': f},
+                               data=payload).json()
 
     if 'ParsedResults' in result:
         for parsed_result in result['ParsedResults']:
@@ -54,7 +57,17 @@ def launch_python_file():
     if last_added_blob:
         file_url = last_added_blob.generate_signed_url(expiration=timedelta(minutes=15))
         print('Last added file URL:', file_url)
-        ocr_space_file(file_url)
+         # Download the file from Firebase
+        file_path = '/path/to/downloaded/file.pdf'
+        response = requests.get(file_url)
+        with open(file_path, 'wb') as f:
+            f.write(response.content)
+
+        # Perform OCR on the downloaded file
+        ocr_space_file(file_path, 'eng', False, 2)
+
+        # Delete the downloaded file
+        os.remove(file_path)
     else:
         print('No files found in the folder')
 
