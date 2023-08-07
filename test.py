@@ -15,7 +15,7 @@ def launch_python_file():
 
     bucket_name = 'tab-tools.appspot.com'
     bucket = storage.bucket(bucket_name)
-    folder_name = 'ZFjks5nrhOXbTsT4qhg1gtREPOw1'  # Replace with the appropriate user UID
+    folder_name = 'user_uid'  # Replace with the appropriate user UID
     blobs = bucket.list_blobs(prefix=folder_name)
 
     # Iterate over the blobs and get the last added file
