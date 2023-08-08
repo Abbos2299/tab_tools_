@@ -1,8 +1,8 @@
 from flask import Flask, request
 import firebase_admin
 from firebase_admin import credentials
-from firebase_admin import storage
 from firebase_admin import firestore
+from firebase_admin import storage
 from datetime import timedelta
 import time
 import requests
@@ -138,8 +138,8 @@ def launch_python_file():
         # Perform OCR on the downloaded file
         ocr_space_file(file_name, 'eng', True, False, False, False, '2')
 
-        # Wait for 5 seconds
-        time.sleep(5)
+        # Wait for 20 seconds
+        time.sleep(20)
 
         # Delete the file
         os.remove(file_name)
