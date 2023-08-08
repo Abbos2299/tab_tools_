@@ -146,7 +146,7 @@ def launch_python_file():
         load_doc_ref = loads_ref.document(file_name)
 
         load_doc_ref.set({
-            'Broker Company Name': most_common_broker
+            'Broker Company Name': 'most_common_broker'
         })
 
         print(f'Firestore document created for Load "{file_name}" with Broker Company Name: {most_common_broker}')
