@@ -137,26 +137,23 @@ def launch_python_file():
         # Perform OCR on the downloaded file
         ocr_space_file(file_name, 'eng', True, False, False, False, '2')
 
-        # Create Firestore document with the most used broker name
-        db = firestore.client()
-        users_ref = db.collection('users')
-        user_doc_ref = users_ref.document(user_uid)
-
-        loads_ref = user_doc_ref.collection('Loads')
-        load_doc_ref = loads_ref.document(file_name)
-
-        load_doc_ref.set({
-            'Broker Company Name': 'most_common_broker'
-        })
-
-        print(f'Firestore document created for Load "{file_name}" with Broker Company Name: {most_common_broker}')
-
-        # Wait for 10 seconds
-        time.sleep(10)
+        # Wait for 20 seconds
+        time.sleep(20)
 
         # Delete the file
         os.remove(file_name)
         print(f'File "{file_name}" deleted successfully')
+
+        # Update Firestore document with the "broker found" field
+        db = firestore.client()
+        users_ref = db.collection('users')
+        user_doc_ref = users_ref.document('ZFjks5nrhOXbTsT4qhg1gtREPOw1')
+
+        user_doc_ref.update({
+            'broker found': True
+        })
+
+        print(f'Firestore document updated with "broker found" field')
     else:
         print('No files found in the folder')
 
