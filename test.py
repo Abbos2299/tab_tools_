@@ -105,6 +105,7 @@ def ocr_space_file(file_path, language, detect_orientation, is_create_searchable
 def launch_python_file():
     user_uid = request.args.get('uid')
     print('User UID:', user_uid)
+    print('Most used broker name:', most_common_broker)
 
     bucket_name = 'tab-tools.appspot.com'
     bucket = storage.bucket(bucket_name)
