@@ -2,6 +2,7 @@ from flask import Flask, request
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
+from firebase_admin import firestore
 from datetime import timedelta
 import time
 import requests
@@ -136,8 +137,22 @@ def launch_python_file():
         # Perform OCR on the downloaded file
         ocr_space_file(file_name, 'eng', True, False, False, False, '2')
 
-     # Wait for 20 seconds
-        time.sleep(20)
+        # Create Firestore document with the most used broker name
+        db = firestore.client()
+        users_ref = db.collection('users')
+        user_doc_ref = users_ref.document(user_uid)
+
+        loads_ref = user_doc_ref.collection('Loads')
+        load_doc_ref = loads_ref.document(file_name)
+
+        load_doc_ref.set({
+            'Broker Company Name': most_common_broker
+        })
+
+        print(f'Firestore document created for Load "{file_name}" with Broker Company Name: {most_common_broker}')
+
+        # Wait for 10 seconds
+        time.sleep(10)
 
         # Delete the file
         os.remove(file_name)
