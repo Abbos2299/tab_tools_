@@ -98,6 +98,21 @@ def ocr_space_file(file_path, language, detect_orientation, is_create_searchable
     if found_broker_names:
         most_common_broker = Counter(found_broker_names).most_common(1)[0][0]
         print('Most used broker name:', most_common_broker)
+        
+        # Create Firestore document with the most used broker name
+            db = firestore.client()
+            users_ref = db.collection('users')
+            user_doc_ref = users_ref.document(user_uid)
+
+            loads_ref = user_doc_ref.collection('Loads')
+            load_doc_ref = loads_ref.document(file_name)
+
+            load_doc_ref.set({
+                'Broker Company Name': most_common_broker
+            })
+        print(
+                f'Firestore document created for Load "{file_name}" with Broker Company Name: {most_common_broker}')
+
     else:
         print('No broker names found in the OCR text')
 
@@ -144,25 +159,6 @@ def launch_python_file():
         # Delete the file
         os.remove(file_name)
         print(f'File "{file_name}" deleted successfully')
-
-        # Check if a broker name was found
-        if 'most_common_broker' in locals():
-            # Create Firestore document with the most used broker name
-            db = firestore.client()
-            users_ref = db.collection('users')
-            user_doc_ref = users_ref.document(user_uid)
-
-            loads_ref = user_doc_ref.collection('Loads')
-            load_doc_ref = loads_ref.document(file_name)
-
-            load_doc_ref.set({
-                'Broker Company Name': most_common_broker
-            })
-
-            print(
-                f'Firestore document created for Load "{file_name}" with Broker Company Name: {most_common_broker}')
-        else:
-            print('No broker names found in the OCR text')
     else:
         print('No files found in the folder')
 
