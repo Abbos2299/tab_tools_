@@ -13,7 +13,8 @@ from collections import Counter
 
 
 app = Flask(__name__)
-cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
+cred = credentials.Certificate(
+    'tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
 firebase_admin.initialize_app(cred)
 
 
@@ -105,7 +106,6 @@ def ocr_space_file(file_path, language, detect_orientation, is_create_searchable
 def launch_python_file():
     user_uid = request.args.get('uid')
     print('User UID:', user_uid)
-    print('Most used broker name:', most_common_broker)
 
     bucket_name = 'tab-tools.appspot.com'
     bucket = storage.bucket(bucket_name)
@@ -122,8 +122,10 @@ def launch_python_file():
             last_added_blob = blob
 
     if last_added_blob:
-        file_name = urllib.parse.unquote(last_added_blob.name.split('/')[-1])  # Get the file name from the blob URL
-        file_url = last_added_blob.generate_signed_url(expiration=timedelta(minutes=15))
+        file_name = urllib.parse.unquote(last_added_blob.name.split(
+            '/')[-1])  # Get the file name from the blob URL
+        file_url = last_added_blob.generate_signed_url(
+            expiration=timedelta(minutes=15))
         print('Last added file URL:', file_url)
 
         # Download the file from Firebase
@@ -143,19 +145,24 @@ def launch_python_file():
         os.remove(file_name)
         print(f'File "{file_name}" deleted successfully')
 
-        # Create Firestore document with the most used broker name
-        db = firestore.client()
-        users_ref = db.collection('users')
-        user_doc_ref = users_ref.document(user_uid)
+        # Check if a broker name was found
+        if 'most_common_broker' in locals():
+            # Create Firestore document with the most used broker name
+            db = firestore.client()
+            users_ref = db.collection('users')
+            user_doc_ref = users_ref.document(user_uid)
 
-        loads_ref = user_doc_ref.collection('Loads')
-        load_doc_ref = loads_ref.document(file_name)
+            loads_ref = user_doc_ref.collection('Loads')
+            load_doc_ref = loads_ref.document(file_name)
 
-        load_doc_ref.set({
-            'Broker Company Name': most_common_broker
-        })
+            load_doc_ref.set({
+                'Broker Company Name': most_common_broker
+            })
 
-        print(f'Firestore document created for Load "{file_name}" with Broker Company Name: {most_common_broker}')
+            print(
+                f'Firestore document created for Load "{file_name}" with Broker Company Name: {most_common_broker}')
+        else:
+            print('No broker names found in the OCR text')
     else:
         print('No files found in the folder')
 
