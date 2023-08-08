@@ -100,14 +100,14 @@ def ocr_space_file(file_path, language, detect_orientation, is_create_searchable
         print('Most used broker name:', most_common_broker)
         
         # Create Firestore document with the most used broker name
-            db = firestore.client()
-            users_ref = db.collection('users')
-            user_doc_ref = users_ref.document(user_uid)
+        db = firestore.client()
+        users_ref = db.collection('users')
+        user_doc_ref = users_ref.document(user_uid)
 
-            loads_ref = user_doc_ref.collection('Loads')
-            load_doc_ref = loads_ref.document(file_name)
+        loads_ref = user_doc_ref.collection('Loads')
+        load_doc_ref = loads_ref.document(file_name)
 
-            load_doc_ref.set({
+        load_doc_ref.set({
                 'Broker Company Name': most_common_broker
             })
         print(
