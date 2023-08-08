@@ -12,8 +12,10 @@ from collections import Counter
 
 
 app = Flask(__name__)
-cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
+cred = credentials.Certificate(
+    'tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
 firebase_admin.initialize_app(cred)
+
 
 def ocr_space_file(file_path, language, detect_orientation, is_create_searchable_pdf, scale, is_table, ocr_engine):
     payload = {
@@ -27,12 +29,13 @@ def ocr_space_file(file_path, language, detect_orientation, is_create_searchable
     }
 
     with open(file_path, 'rb') as f:
-        result = requests.post('https://api.ocr.space/parse/image', 
+        result = requests.post('https://api.ocr.space/parse/image',
                                files={'filename': f},
                                data=payload).json()
 
     if 'ParsedResults' in result:
-        ocr_text = ' '.join([parsed_result['ParsedText'] for parsed_result in result['ParsedResults']])
+        ocr_text = ' '.join([parsed_result['ParsedText']
+                            for parsed_result in result['ParsedResults']])
         broker_names = [
             'AFC Brokerage', 'AFC Logistics', 'Agricultural Logistics, LLC', 'AIT Truckload Solutions', 'Allen Lund',
             'Alliance Highway Capacity', 'ALLY LOGISTICS LLC', 'AM Transport Services, Inc', 'American Group, LLC',
@@ -81,21 +84,21 @@ def ocr_space_file(file_path, language, detect_orientation, is_create_searchable
             'Value Logistics Inc', 'VERIHA LOGISTICS', 'Veritiv Logistics Solutions', 'West Motor Freight of PA',
             'WORLDWIDE EXPRESS GLOBALTRANZ', 'XPO Logistics, LLC', 'Yellow Logistics', 'Zengistics Solutions Inc'
         ]
-        
+
     # if 'ParsedResults' in result:
     #     for parsed_result in result['ParsedResults']:
     #         print(parsed_result['ParsedText'])
-    
-    broker_names_regex = '|'.join([re.escape(broker) for broker in broker_names])
-    found_broker_names = re.findall(broker_names_regex, ocr_text, re.IGNORECASE)
 
-        if found_broker_names:
-            most_common_broker = Counter(found_broker_names).most_common(1)[0][0]
-            print('Most used broker name:', most_common_broker)
-        else:
-            print('No broker names found in the OCR text')
+    broker_names_regex = '|'.join([re.escape(broker)
+                                  for broker in broker_names])
+    found_broker_names = re.findall(
+        broker_names_regex, ocr_text, re.IGNORECASE)
+
+    if found_broker_names:
+        most_common_broker = Counter(found_broker_names).most_common(1)[0][0]
+        print('Most used broker name:', most_common_broker)
     else:
-        print("Error occurred: ", result['ErrorMessage'])
+        print('No broker names found in the OCR text')
 
 
 @app.route('/launch', methods=['GET'])
@@ -118,8 +121,10 @@ def launch_python_file():
             last_added_blob = blob
 
     if last_added_blob:
-        file_name = urllib.parse.unquote(last_added_blob.name.split('/')[-1])  # Get the file name from the blob URL
-        file_url = last_added_blob.generate_signed_url(expiration=timedelta(minutes=15))
+        file_name = urllib.parse.unquote(last_added_blob.name.split(
+            '/')[-1])  # Get the file name from the blob URL
+        file_url = last_added_blob.generate_signed_url(
+            expiration=timedelta(minutes=15))
         print('Last added file URL:', file_url)
         # Download the file from Firebase
         response = requests.get(file_url)
@@ -127,7 +132,7 @@ def launch_python_file():
             f.write(response.content)
 
         print(f'File "{file_name}" downloaded successfully')
-        
+
         # Perform OCR on the downloaded file
         ocr_space_file(file_name, 'eng', True, False, False, False, '2')
 
@@ -141,6 +146,7 @@ def launch_python_file():
         print('No files found in the folder')
 
     return 'Success'
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
