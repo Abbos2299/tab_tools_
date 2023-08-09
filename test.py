@@ -13,8 +13,7 @@ from collections import Counter
 
 
 app = Flask(__name__)
-cred = credentials.Certificate(
-    'tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
+cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
 firebase_admin.initialize_app(cred)
 
 
@@ -86,10 +85,6 @@ def ocr_space_file(file_path, language, detect_orientation, is_create_searchable
             'WORLDWIDE EXPRESS GLOBALTRANZ', 'XPO Logistics, LLC', 'Yellow Logistics', 'Zengistics Solutions Inc'
         ]
 
-    # if 'ParsedResults' in result:
-    #     for parsed_result in result['ParsedResults']:
-    #         print(parsed_result['ParsedText'])
-
     broker_names_regex = '|'.join([re.escape(broker)
                                   for broker in broker_names])
     found_broker_names = re.findall(
@@ -98,23 +93,10 @@ def ocr_space_file(file_path, language, detect_orientation, is_create_searchable
     if found_broker_names:
         most_common_broker = Counter(found_broker_names).most_common(1)[0][0]
         print('Most used broker name:', most_common_broker)
-        
-        # Create Firestore document with the most used broker name
-        db = firestore.client()
-        users_ref = db.collection('users')
-        user_doc_ref = users_ref.document(user_uid)
-
-        loads_ref = user_doc_ref.collection('Loads')
-        load_doc_ref = loads_ref.document(file_name)
-
-        load_doc_ref.set({
-                'Broker Company Name': most_common_broker
-            })
-        print(
-                f'Firestore document created for Load "{file_name}" with Broker Company Name: {most_common_broker}')
-
+        return most_common_broker
     else:
         print('No broker names found in the OCR text')
+        return None
 
 
 @app.route('/launch', methods=['GET'])
@@ -137,10 +119,8 @@ def launch_python_file():
             last_added_blob = blob
 
     if last_added_blob:
-        file_name = urllib.parse.unquote(last_added_blob.name.split(
-            '/')[-1])  # Get the file name from the blob URL
-        file_url = last_added_blob.generate_signed_url(
-            expiration=timedelta(minutes=15))
+        file_name = urllib.parse.unquote(last_added_blob.name.split('/')[-1])  # Get the file name from the blob URL
+        file_url = last_added_blob.generate_signed_url(expiration=timedelta(minutes=15))
         print('Last added file URL:', file_url)
 
         # Download the file from Firebase
@@ -151,7 +131,7 @@ def launch_python_file():
         print(f'File "{file_name}" downloaded successfully')
 
         # Perform OCR on the downloaded file
-        ocr_space_file(file_name, 'eng', True, False, False, False, '2')
+        most_common_broker = ocr_space_file(file_name, 'eng', True, False, False, False, '2')
 
         # Wait for 20 seconds
         time.sleep(20)
@@ -159,6 +139,24 @@ def launch_python_file():
         # Delete the file
         os.remove(file_name)
         print(f'File "{file_name}" deleted successfully')
+
+        # Check if a broker name was found
+        if most_common_broker:
+            # Create Firestore document with the most used broker name
+            db = firestore.client()
+            users_ref = db.collection('users')
+            user_doc_ref = users_ref.document(user_uid)
+
+            loads_ref = user_doc_ref.collection('Loads')
+            load_doc_ref = loads_ref.document(file_name)
+
+            load_doc_ref.set({
+                'Broker Company Name': most_common_broker
+            })
+
+            print(f'Firestore document created for Load "{file_name}" with Broker Company Name: {most_common_broker}')
+        else:
+            print('No broker names found in the OCR text')
     else:
         print('No files found in the folder')
 
