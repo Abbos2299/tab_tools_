@@ -16,8 +16,6 @@ def launch_python_file():
     user_uid = request.args.get('uid')
     print('User UID:', user_uid)
 
-    time.sleep(2)
-
     # Get Firestore client
     db = firestore.client()
 
@@ -25,10 +23,14 @@ def launch_python_file():
     user_doc_ref = db.collection('users').document(user_uid)
     user_doc = user_doc_ref.get()
 
+    print('User document exists:', user_doc.exists)
+
     if user_doc.exists:
         # Access the 'User Info' subcollection and retrieve the document with the given UID
         user_info_doc_ref = user_doc_ref.collection('User Info').document(user_uid)
         user_info_doc = user_info_doc_ref.get()
+
+        print('User Info document exists:', user_info_doc.exists)
 
         if user_info_doc.exists:
             mc = user_info_doc.get('MC')
