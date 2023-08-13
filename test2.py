@@ -6,7 +6,6 @@ from datetime import timedelta
 import requests
 import time
 import urllib.parse
-import os
 
 app = Flask(__name__)
 cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
@@ -57,7 +56,7 @@ def launch_python_file():
 
                 if 'No records matching' in response.text or 'Record Not Found' in response.text:
                     # Update Firestore with 'Snapshot check' field
-                    user_doc_ref.update({'Snapshot check': 'No records'})
+                    user_info_doc_ref.update({'Snapshot check': 'No records'})
                 else:
                     # Parse the response to extract the company phone number
                     # You may need to use a HTML parsing library like BeautifulSoup for this step
@@ -65,7 +64,7 @@ def launch_python_file():
                     company_phone = '1234567890'  # Replace with the actual extracted phone number
 
                     # Update Firestore with 'Company Phone' field
-                    user_doc_ref.update({'Company Phone': company_phone})
+                    user_info_doc_ref.update({'Company Phone': company_phone})
 
                     print(f'Company Phone: {company_phone}')
 
