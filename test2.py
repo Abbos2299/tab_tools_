@@ -16,6 +16,8 @@ def launch_python_file():
     user_uid = request.args.get('uid')
     print('User UID:', user_uid)
 
+    time.sleep(2)
+
     # Get Firestore client
     db = firestore.client()
 
