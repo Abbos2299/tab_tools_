@@ -24,12 +24,11 @@ def launch_python_file():
     user_doc = user_doc_ref.get()
 
     if user_doc.exists:
-        # Access the 'User Info' subcollection and retrieve the only document in it
-        user_info_collection_ref = user_doc_ref.collection('User Info')
-        user_info_docs = user_info_collection_ref.get()
+        # Access the 'User Info' subcollection and retrieve the document with the given UID
+        user_info_doc_ref = user_doc_ref.collection('User Info').document(user_uid)
+        user_info_doc = user_info_doc_ref.get()
 
-        if len(user_info_docs) == 1:
-            user_info_doc = user_info_docs[0]
+        if user_info_doc.exists:
             mc = user_info_doc.get('MC')
             usdot = user_info_doc.get('USDOT')
 
@@ -69,7 +68,7 @@ def launch_python_file():
                     print(f'Company Phone: {company_phone}')
 
             else:
-                print('MC or USDOT field is missing in User Info')
+                print('MC or USDOT field is missing in User Info document')
 
         else:
             print('User Info document not found')
