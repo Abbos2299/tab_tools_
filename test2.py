@@ -19,10 +19,8 @@ def launch_python_file():
 
     # Get Firestore client
     db = firestore.client()
-
-    # Access the 'users' collection and retrieve the document with the given UID
-    user_doc_ref = db.collection('users').document(user_uid)
-    user_doc = user_doc_ref.get()
+            users_ref = db.collection('users')
+            user_doc_ref = users_ref.document(user_uid)
 
     if user_doc.exists:
         # Access the 'User Info' subcollection and retrieve the only document in it
