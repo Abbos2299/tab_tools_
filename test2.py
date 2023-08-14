@@ -22,58 +22,55 @@ def launch_python_file():
     user_doc_ref = db.collection('users').document(user_uid)
     user_doc = user_doc_ref.get()
 
-    if user_doc.exists:
-        # Access the 'User Info' subcollection and retrieve the document with the given UID
-        user_info_doc_ref = user_doc_ref.collection('User Info').document(user_uid)
-        user_info_doc = user_info_doc_ref.get()
 
-        if user_info_doc.exists:
-            mc = user_info_doc.get('MC')
-            usdot = user_info_doc.get('USDOT')
+    # Access the 'User Info' subcollection and retrieve the document with the given UID
+    user_info_doc_ref = user_doc_ref.collection('User Info').document(user_uid)
+    user_info_doc = user_info_doc_ref.get()
 
-            if mc:
-                mc_usdot = mc
-                search_field = 'MC'
-            elif usdot:
-                mc_usdot = usdot
-                search_field = 'USDOT'
+    if user_info_doc.exists:
+        mc = user_info_doc.get('MC')
+        usdot = user_info_doc.get('USDOT')
+
+        if mc:
+            mc_usdot = mc
+            search_field = 'MC'
+        elif usdot:
+            mc_usdot = usdot
+            search_field = 'USDOT'
+        else:
+            mc_usdot = None
+            search_field = None
+
+        if mc_usdot and search_field:
+            # URL encode the MC/USDOT number
+            mc_usdot_encoded = urllib.parse.quote(mc_usdot)
+
+            # Build the URL for the search
+            url = f'https://safer.fmcsa.dot.gov/CompanySnapshot.aspx?SearchType=Company&Dbn={mc_usdot_encoded}'
+
+            # Send the request to the website
+            response = requests.get(url)
+            time.sleep(3)  # Wait for 3 seconds to allow the page to load
+
+            if 'No records matching' in response.text or 'Record Not Found' in response.text:
+                # Update Firestore with 'Snapshot check' field
+                user_info_doc_ref.update({'Snapshot check': 'No records'})
             else:
-                mc_usdot = None
-                search_field = None
+                # Parse the response to extract the company phone number
+                # You may need to use a HTML parsing library like BeautifulSoup for this step
+                # Assuming the extracted phone number is stored in a variable called 'company_phone'
+                company_phone = '1234567890'  # Replace with the actual extracted phone number
 
-            if mc_usdot and search_field:
-                # URL encode the MC/USDOT number
-                mc_usdot_encoded = urllib.parse.quote(mc_usdot)
+                # Update Firestore with 'Company Phone' field
+                user_info_doc_ref.update({'Company Phone': company_phone})
 
-                # Build the URL for the search
-                url = f'https://safer.fmcsa.dot.gov/CompanySnapshot.aspx?SearchType=Company&Dbn={mc_usdot_encoded}'
-
-                # Send the request to the website
-                response = requests.get(url)
-                time.sleep(3)  # Wait for 3 seconds to allow the page to load
-
-                if 'No records matching' in response.text or 'Record Not Found' in response.text:
-                    # Update Firestore with 'Snapshot check' field
-                    user_info_doc_ref.update({'Snapshot check': 'No records'})
-                else:
-                    # Parse the response to extract the company phone number
-                    # You may need to use a HTML parsing library like BeautifulSoup for this step
-                    # Assuming the extracted phone number is stored in a variable called 'company_phone'
-                    company_phone = '1234567890'  # Replace with the actual extracted phone number
-
-                    # Update Firestore with 'Company Phone' field
-                    user_info_doc_ref.update({'Company Phone': company_phone})
-
-                    print(f'Company Phone: {company_phone}')
-
-            else:
-                print('MC or USDOT field is missing in User Info document')
+                print(f'Company Phone: {company_phone}')
 
         else:
-            print('User Info document not found')
+            print('MC or USDOT field is missing in User Info document')
 
     else:
-        print('User document not found')
+        print('User Info document not found')
 
     return 'Success'
 
