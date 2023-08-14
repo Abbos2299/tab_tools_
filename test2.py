@@ -2,10 +2,9 @@ from flask import Flask, request
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-from datetime import timedelta
+import urllib.parse
 import requests
 import time
-import urllib.parse
 
 app = Flask(__name__)
 cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
@@ -18,17 +17,15 @@ def launch_python_file():
 
     # Get Firestore client
     db = firestore.client()
-        users_ref = db.collection('users')
-        user_doc_ref = users_ref.document(user_uid)
 
-    print('User document exists:', user_doc.exists)
+    # Access the 'users' collection and retrieve the document with the given UID
+    user_doc_ref = db.collection('users').document(user_uid)
+    user_doc = user_doc_ref.get()
 
-    if user_doc_ref.exists:
+    if user_doc.exists:
         # Access the 'User Info' subcollection and retrieve the document with the given UID
         user_info_doc_ref = user_doc_ref.collection('User Info').document(user_uid)
         user_info_doc = user_info_doc_ref.get()
-
-        print('User Info document exists:', user_info_doc.exists)
 
         if user_info_doc.exists:
             mc = user_info_doc.get('MC')
