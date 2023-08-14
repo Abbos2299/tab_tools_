@@ -61,8 +61,8 @@ def launch_python_file():
                 # Assuming the extracted phone number is stored in a variable called 'company_phone'
                 company_phone = '1234567890'  # Replace with the actual extracted phone number
 
-                # Update Firestore with 'Company Phone' field
-                user_info_doc_ref.update({'Company Phone': company_phone})
+                # Update Firestore with 'Company_Phone' field
+                user_info_doc_ref.update({'Company_Phone': company_phone})
 
                 print(f'Company Phone: {company_phone}')
 
