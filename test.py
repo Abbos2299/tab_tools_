@@ -8,7 +8,7 @@ import requests
 import time
 import urllib.parse
 import os
-
+import subprocess
 
 app = Flask(__name__)
 cred = credentials.Certificate('tab-tools-firebase-adminsdk-8ncav-4f5ccee9af.json')
@@ -25,8 +25,8 @@ def launch_python_file():
     folder_name = user_uid  # Replace with the appropriate user UID
     blobs = bucket.list_blobs(prefix=folder_name)
 
-    # Wait for 5 seconds
-    time.sleep(5)
+    # Wait for 2 seconds
+    time.sleep(2)
 
     # Iterate over the blobs and get the last added file
     last_added_blob = None
@@ -46,16 +46,23 @@ def launch_python_file():
 
         print(f'File "{file_name}" downloaded successfully')
 
-        # Process the PDF file and extract the broker name
-        # Replace this code with your PDF processing logic
-        # ...
+        # Process the PDF file using ocrmypdf
+        processed_file_name = f'processed_{file_name}'
+        subprocess.run(['ocrmypdf', file_name, processed_file_name])
 
-        # Wait for 20 seconds
-        time.sleep(20)
+        # Read the processed PDF file and extract the text
+        with open(processed_file_name, 'rb') as f:
+            processed_pdf_content = f.read()
 
-        # Delete the file
+        # Convert the processed PDF content to text
+        text = processed_pdf_content.decode('utf-8')
+
+        print('Text extracted from PDF:', text)
+
+        # Delete the processed files
         os.remove(file_name)
-        print(f'File "{file_name}" deleted successfully')
+        os.remove(processed_file_name)
+        print(f'Files "{file_name}" and "{processed_file_name}" deleted successfully')
 
         # Check if a broker name was found
         if broker_name:
@@ -68,7 +75,8 @@ def launch_python_file():
             load_doc_ref = loads_ref.document(file_name)
 
             load_doc_ref.set({
-                'Broker Company Name': broker_name
+                'Broker Company Name': broker_name,
+                'Extracted Text': text
             })
 
             print(f'Firestore document created for Load "{file_name}" with Broker Company Name: {broker_name}')
